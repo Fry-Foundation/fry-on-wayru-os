@@ -5,3 +5,18 @@ os_version = "23.1.0"
 [openwrt]
 repo = "https://git.openwrt.org/openwrt/openwrt.git"
 tag = "v23.05.4"
+
+[[openwrt.feeds]]
+method = "src-git"
+name = "wayru_os_feed"
+url = "https://github.com/Wayru-Network/wayru-os-feed.git"
+
+[[openwrt.feeds]]
+method = "src-git"
+name = "openwisp_config"
+url = "https://github.com/openwisp/openwisp-config.git"
+
+[[openwrt.feeds]]
+method = "src-git"
+name = "openwisp_monitoring"
+url = "https://github.com/openwisp/openwrt-openwisp-monitoring.git"

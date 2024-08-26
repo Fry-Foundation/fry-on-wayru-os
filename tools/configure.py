@@ -57,22 +57,18 @@ def generate_device_json(codename: str, brand: str, model: str) -> None:
         json.dump(data, device_json_file, indent=2)
 
 def generate_banner(codename: str, version: str) -> None:
-    banner = r'''
- _       __                       ____  _____
-| |     / /___ ___  _________  __/ __ \/ ___/
-| | /| / / __ `/ / / / ___/ / / / / / /\__ \
-| |/ |/ / /_/ / /_/ / /  / /_/ / /_/ /___/ /
-|__/|__/\__,_/\__, /_/   \__,_/\____//____/
-        /____/
----------------------------------------------
-variant codename: {codename}
-version: {version}
----------------------------------------------'''
+    # Read the ASCII logo file at resources/ascii-logo and load it into a variable
+    ascii_logo = ''
+    with open('resources/ascii-logo', 'r') as ascii_logo_file:
+        ascii_logo = ascii_logo_file.read()
 
-    # Remove the leading newline character
-    banner = banner[1:] if banner.startswith('\n') else banner
+    # Prepare the rest of the banner
+    separator = '---------------------------------------------'
+    variant_codename = f'variant codename: {codename}'
+    version = f'version: {version}'
 
-    banner = banner.format(codename=codename, version=version)
+    # Build the banner with the ascii logo, the separator and the details
+    banner = f'{ascii_logo}\n{separator}\n{variant_codename}\n{version}\n{separator}\n'
 
     banner_path = os.path.join(TMP_PATH, BANNER_FILE)
     with open(banner_path, 'w') as banner_file:
@@ -124,6 +120,20 @@ def main():
     # Copy diffconfig
     shutil.copy2(os.path.join(TMP_PATH, DIFFCONFIG_FILE), 'openwrt/.config')
 
+    # Set up feeds
+    default_feeds_content = ''
+    with open('openwrt/feeds.conf.default', 'r') as default_feeds_file:
+        default_feeds_content = default_feeds_file.read()
+
+    feeds = base_config['openwrt']['feeds']
+    feeds_content = ''
+    for feed in feeds:
+        feeds_content += f'{feed["method"]} {feed["name"]} {feed["url"]}\n'
+
+    with open('openwrt/feeds.conf', 'w') as feeds_file:
+        feeds_file.write(feeds_content)
+        feeds_file.write('\n')
+        feeds_file.write(default_feeds_content)
 
 if __name__ == '__main__':
     main()
