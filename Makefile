@@ -1,32 +1,35 @@
+OPENWRT_DIR := openwrt
+TOOLS_DIR := tools
+
 .PHONY: clone-openwrt configure update-feeds uninstall-feeds defconfig build upload-build clean-openwrt reset build-debug
 
 clone-openwrt:
-	./tools/clone-openwrt.sh
+	$(TOOLS_DIR)/clone-openwrt.sh
 
 configure:
-	python tools/configure.py
+	python $(TOOLS_DIR)/configure.py
 
 update-feeds:
-	cd openwrt && ./scripts/feeds update -a
-	cd openwrt && ./scripts/feeds install -a
+	cd $(OPENWRT_DIR) && ./scripts/feeds update -a
+	cd $(OPENWRT_DIR) && ./scripts/feeds install -a
 
 uninstall-feeds:
-	cd openwrt && ./scripts/feeds uninstall -a
+	cd $(OPENWRT_DIR) && ./scripts/feeds uninstall -a
 
 defconfig:
-	cd openwrt && make defconfig
+	cd $(OPENWRT_DIR) && $(MAKE) defconfig
 
 build:
-	cd openwrt && make -j$(nproc) download clean world
+	cd $(OPENWRT_DIR) && $(MAKE) -j$(nproc) download clean world
 
 build-debug:
-	cd openwrt && make -j1 V=s
+	cd $(OPENWRT_DIR) && $(MAKE) -j1 V=s
 
 upload-build:
-	python tools/upload-build.py
+	python $(TOOLS_DIR)/upload-build.py
 
 clean-openwrt:
-	cd openwrt && make clean
+	cd $(OPENWRT_DIR) && $(MAKE) clean
 
 reset:
-	rm -rf openwrt
+	rm -rf $(OPENWRT_DIR) || echo "OpenWRT directory not found, skipping..."
