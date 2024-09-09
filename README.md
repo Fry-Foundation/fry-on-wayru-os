@@ -49,14 +49,21 @@ Example: `wayru-os-genesis-23.1.0`
 Make sure to have installed:
 - `make`
 - `git`
-- `tomlq`
 - `python3` aliased as `python` (highly recommend using a virtual environment)
+  - example: `python3 -m venv .venv`
+  - activate the virtual environment: `source .venv/bin/activate`
+  - confirm `python --version` works and that the alias is set up correctly
 - python dependencies: `pip install -r requirements.txt`
 - Dependencies needed to build OpenWrt: https://openwrt.org/docs/guide-developer/toolchain/install-buildsystem
 
 ## Repo tools
+The repo has tools to configure, build, and publish wayru-os images.
+
+Check the `Makefile` and the `tools` folder for a better understanding of the tools available.
+
+To set up and build a wayru-os image, you can follow these steps:
 - Clone the OpenWrt repository `make clone-openwrt`
-- Configure build system with wayru-os profiels `make configure`
+- Configure build system with wayru-os profiles `make configure`
   - Make sure to have specified the profile in the `.env` file
 - Update and install feeds `make update-feeds`
 - Complete the configuration with the OpenWrt build system `make defconfig`
