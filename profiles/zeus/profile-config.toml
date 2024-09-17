@@ -1,0 +1,32 @@
+[general]
+codename = "Zeus"
+brand = "TP-Link"
+model = "EAP225-Outdoor v3"
+
+[build]
+target = "ath79"
+subtarget = "generic"
+device_profile = "tplink_eap225-outdoor-v3"
+
+[packages]
+base = [
+    "curl",
+    "libcurl",
+    "ca-certificates",
+    "lua",
+    "lua-cjson",
+    "luafilesystem",
+    "liblua",
+    "libuci-lua",
+    "libubus-lua",
+    # Enterprise networks
+    "wpad",
+    # OpenWISP
+    "openwisp-config",
+    "openwisp-monitoring",
+    "netjson-monitoring",
+    "openvpn-openssl",
+    # Wayru services
+    "wayru-os-api",
+    "wayru-os-services",
+]

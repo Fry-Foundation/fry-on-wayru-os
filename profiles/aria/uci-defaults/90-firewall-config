@@ -1,0 +1,74 @@
+uci -q batch << EOI
+
+add firewall zone
+set firewall.@zone[-1].name='captive'
+set firewall.@zone[-1].input='ACCEPT'
+set firewall.@zone[-1].output='ACCEPT'
+set firewall.@zone[-1].forward='ACCEPT'
+add_list firewall.@zone[-1].network='captive'
+
+
+add firewall zone
+set firewall.@zone[-1].name='encrypted'
+set firewall.@zone[-1].input='ACCEPT'
+set firewall.@zone[-1].output='ACCEPT'
+set firewall.@zone[-1].forward='ACCEPT'
+add_list firewall.@zone[-1].network='encrypted'
+
+
+add firewall forwarding
+set firewall.@forwarding[-1].src='captive'
+set firewall.@forwarding[-1].dest='wan'
+
+add firewall forwarding
+set firewall.@forwarding[-1].src='encrypted'
+set firewall.@forwarding[-1].dest='wan'
+
+del firewall.cfg02dc81
+del firewall.cfg04ad58
+del firewall.cfg0c92bd
+del firewall.cfg0d92bd
+del firewall.cfg01e63d.syn_flood
+set firewall.cfg01e63d.synflood_protect='1'
+del firewall.cfg03dc81.network
+add_list firewall.cfg03dc81.network='wan'
+add_list firewall.cfg03dc81.network='wan6'
+del firewall.cfg0edc81.network
+add_list firewall.cfg0edc81.network='captive'
+del firewall.cfg10dc81.network
+add_list firewall.cfg10dc81.network='encrypted'
+
+
+add firewall rule
+set firewall.@rule[-1].name='Allow-IPSec-ESP'
+set firewall.@rule[-1].dest='lan'
+set firewall.@rule[-1].proto='esp'
+set firewall.@rule[-1].src='captive'
+set firewall.@rule[-1].target='ACCEPT'
+
+add firewall rule
+set firewall.@rule[-1].name='Allow-ISAKMP'
+set firewall.@rule[-1].dest='captive'
+set firewall.@rule[-1].dest_port='500'
+set firewall.@rule[-1].proto='udp'
+set firewall.@rule[-1].src='wan'
+set firewall.@rule[-1].target='ACCEPT'
+
+add firewall rule
+set firewall.@rule[-1].name='Allow-IPSec-ESP'
+set firewall.@rule[-1].dest='encrypted'
+set firewall.@rule[-1].proto='esp'
+set firewall.@rule[-1].src='captive'
+set firewall.@rule[-1].target='ACCEPT'
+
+add firewall rule
+set firewall.@rule[-1].name='Allow-ISAKMP'
+set firewall.@rule[-1].dest='encrypted'
+set firewall.@rule[-1].dest_port='500'
+set firewall.@rule[-1].proto='udp'
+set firewall.@rule[-1].src='wan'
+set firewall.@rule[-1].target='ACCEPT'
+
+commit firewall
+
+EOI

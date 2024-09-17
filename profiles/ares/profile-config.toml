@@ -1,0 +1,41 @@
+[general]
+codename = "Ares"
+brand = "TP-Link"
+model = "AC1750 Archer C7 V5 US"
+
+[build]
+target = "ath79"
+subtarget = "generic"
+device_profile = "tplink_archer-c7-v5"
+
+[packages]
+base = [
+    "curl",
+    "libcurl",
+    "ca-certificates",
+    "lua",
+    "lua-cjson",
+    "luafilesystem",
+    "liblua",
+    "libuci-lua",
+    "libubus-lua",
+    # Enterprise networks
+    "wpad",
+    # OpenWISP
+    "openwisp-config",
+    "openwisp-monitoring",
+    "netjson-monitoring",
+    "openvpn-openssl",
+    # Captive portal
+    "opennds",
+    "php8",
+    "php8-cli",
+    "php8-mod-openssl",
+    "dnsmasq-full",
+    "dnsmasq_full_dhcp",
+    "dnsmasq_full_ipset",
+    "ipset",
+    # Wayru services
+    "wayru-os-api",
+    "wayru-os-services",
+]
