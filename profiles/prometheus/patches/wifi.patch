@@ -1,0 +1,15 @@
+diff --git a/target/linux/mediatek/filogic/base-files/etc/hotplug.d/ieee80211/11_fix_wifi_mac b/target/linux/mediatek/filogic/base-files/etc/hotplug.d/ieee80211/11_fix_wifi_mac
+index 053d8e09cd..121e0489fe 100644
+--- a/target/linux/mediatek/filogic/base-files/etc/hotplug.d/ieee80211/11_fix_wifi_mac
++++ b/target/linux/mediatek/filogic/base-files/etc/hotplug.d/ieee80211/11_fix_wifi_mac
+@@ -61,6 +61,10 @@ case "$board" in
+ 		addr=$(mtd_get_mac_binary "Factory" 0x8000)
+ 		[ "$PHYNBR" = "1" ] && macaddr_add $addr 1 > /sys${DEVPATH}/macaddress
+ 		;;
++	comfast,cf-wa933)
++		addr=$(mtd_get_mac_binary "Factory" 0x8000)
++		[ "$PHYNBR" = "1" ] && macaddr_add $addr 1 > /sys${DEVPATH}/macaddress
++		;;
+ 	cudy,tr3000-v1|\
+ 	cudy,re3000-v1)
+ 		addr=$(mtd_get_mac_binary bdinfo 0xde00)

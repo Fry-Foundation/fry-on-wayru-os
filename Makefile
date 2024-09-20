@@ -1,7 +1,7 @@
 OPENWRT_DIR := openwrt
 TOOLS_DIR := tools
 
-.PHONY: clone-openwrt configure update-feeds uninstall-feeds defconfig build upload-build clean-openwrt reset build-debug
+.PHONY: clone-openwrt configure update-feeds uninstall-feeds add-patches defconfig build upload-build clean-openwrt reset build-debug
 
 clone-openwrt:
 	$(TOOLS_DIR)/clone-openwrt.sh
@@ -12,6 +12,9 @@ update-feeds:
 
 uninstall-feeds:
 	cd $(OPENWRT_DIR) && ./scripts/feeds uninstall -a
+
+add-patches:
+	python $(TOOLS_DIR)/add_patches.py
 
 configure:
 	python $(TOOLS_DIR)/configure.py

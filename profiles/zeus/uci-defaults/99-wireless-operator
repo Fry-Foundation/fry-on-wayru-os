@@ -1,7 +1,7 @@
 uci -q batch << EOI
 
 set wireless.@wifi-device[0].disabled='0'
-set wireless.@wifi-device[0].htmode='VHT20'
+set wireless.@wifi-device[0].htmode='VHT40'
 set wireless.@wifi-device[0].channel='auto'
 set wireless.@wifi-device[0].txpower='23'
 set wireless.@wifi-device[0].cell_density='0'

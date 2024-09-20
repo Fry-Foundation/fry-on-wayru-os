@@ -1,0 +1,14 @@
+diff --git a/package/boot/uboot-envtools/files/mediatek_filogic b/package/boot/uboot-envtools/files/mediatek_filogic
+index 85114ec938..6982a550c9 100644
+--- a/package/boot/uboot-envtools/files/mediatek_filogic
++++ b/package/boot/uboot-envtools/files/mediatek_filogic
+@@ -60,6 +60,9 @@ cmcc,rax3000m)
+ comfast,cf-e393ax)
+ 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x20000" "0x80000"
+ 	;;
++comfast,cf-wa933)
++	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x20000" "0x80000"
++	;;
+ cetron,ct3003|\
+ netgear,wax220|\
+ zbtlink,zbt-z8102ax|\
