@@ -5,24 +5,16 @@ set dhcp.captive.interface='captive'
 set dhcp.captive.start='100'
 set dhcp.captive.limit='150'
 set dhcp.captive.leasetime='12h'
-set dhcp.captive.dhcpv4='server'
-set dhcp.captive.dhcpv6='server'
-set dhcp.captive.ra='server'
-set dhcp.captive.ra_slaac='1'
-add_list dhcp.captive.ra_flags='managed-config'
-add_list dhcp.captive.ra_flags='other-config'
+set dhcp.captive.force='1'
 
 set dhcp.encrypted=dhcp
 set dhcp.encrypted.interface='encrypted'
 set dhcp.encrypted.start='100'
 set dhcp.encrypted.limit='150'
 set dhcp.encrypted.leasetime='12h'
-set dhcp.encrypted.dhcpv4='server'
-set dhcp.encrypted.dhcpv6='server'
-set dhcp.encrypted.ra='server'
-set dhcp.encrypted.ra_slaac='1'
-add_list dhcp.encrypted.ra_flags='managed-config'
-add_list dhcp.encrypted.ra_flags='other-config'
+set dhcp.encrypted.force='1'
+
+del dhcp.lan
 
 commit dhcp
 

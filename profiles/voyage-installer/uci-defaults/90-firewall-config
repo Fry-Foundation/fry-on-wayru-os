@@ -1,0 +1,14 @@
+uci -q batch << EOI
+
+set firewall.@defaults[0].forward='ACCEPT'
+set firewall.@zone[1].network='wan'
+set firewall.@zone[0].network='lan'
+set firewall.@zone[0].input='ACCEPT'
+set firewall.@zone[0].output='ACCEPT'
+set firewall.@zone[0].forward='REJECT'
+
+add firewall forwarding
+set firewall.@forwarding[-1].src='lan'
+set firewall.@forwarding[-1].dest='wan'
+
+commit firewall

@@ -1,0 +1,29 @@
+[general]
+codename = "Voyage"
+brand = "Wayru"
+model = "Voyage"
+
+[build]
+target = "x86"
+subtarget = "64"
+device_profile = "generic"
+
+[packages]
+base = [
+    "curl",
+    "libcurl",
+    "ca-certificates",
+    "lua",
+    "lua-cjson",
+    "luafilesystem",
+    "liblua",
+    "libuci-lua",
+    "libubus-lua",
+    # OpenWISP
+    "openwisp-config",
+    "openwisp-monitoring",
+    "netjson-monitoring",
+    "openvpn-openssl",
+    # Wayru services
+    "wayru-os-api",
+]
