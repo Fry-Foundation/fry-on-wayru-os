@@ -1,18 +1,14 @@
 uci -q batch << EOI
 
 set wireless.radio0.disabled='0'
-set wireless.radio0.htmode='VHT20'
+set wireless.radio0.htmode='VHT80'
 set wireless.radio0.channel='auto'
-set wireless.radio0.txpower='23'
 set wireless.radio0.cell_density='0'
-set wireless.radio0.band='5g'
 
 set wireless.radio1.disabled='0'
-set wireless.radio1.htmode='HT20'
+set wireless.radio1.htmode='HT40'
 set wireless.radio1.channel='auto'
-set wireless.radio1.txpower='27'
 set wireless.radio1.cell_density='0'
-set wireless.radio1.band='2g'
 
 set wireless.default_radio0.disabled='0'
 set wireless.default_radio0.ssid='Wayru Operator'
@@ -20,7 +16,6 @@ set wireless.default_radio0.encryption='psk2'
 set wireless.default_radio0.key='988Dh283zX'
 set wireless.default_radio0.network='encrypted'
 set wireless.default_radio0.isolate='1'
-set wireless.default_radio0.wmm='1'
 
 set wireless.default_radio1.disabled='0'
 set wireless.default_radio1.ssid='Wayru Operator'
@@ -28,7 +23,6 @@ set wireless.default_radio1.encryption='psk2'
 set wireless.default_radio1.key='988Dh283zX'
 set wireless.default_radio1.network='encrypted'
 set wireless.default_radio1.isolate='1'
-set wireless.default_radio1.wmm='1'
 
 rename wireless.default_radio0=default_wifi_interface_0
 rename wireless.default_radio1=default_wifi_interface_1

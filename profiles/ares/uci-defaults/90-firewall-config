@@ -22,6 +22,10 @@ add firewall forwarding
 set firewall.@forwarding[-1].src='encrypted'
 set firewall.@forwarding[-1].dest='wan'
 
+del firewall.cfg01e63d.syn_flood
+set firewall.cfg01e63d.synflood_protect='1'
+set firewall.cfg01e63d.flow_offloading='1'
+
 commit firewall
 
 EOI

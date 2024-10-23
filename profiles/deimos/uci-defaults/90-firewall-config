@@ -30,6 +30,7 @@ del firewall.cfg0c92bd
 del firewall.cfg0d92bd
 del firewall.cfg01e63d.syn_flood
 set firewall.cfg01e63d.synflood_protect='1'
+set firewall.cfg01e63d.flow_offloading='1'
 del firewall.cfg03dc81.network
 add_list firewall.cfg03dc81.network='wan'
 add_list firewall.cfg03dc81.network='wan6'
