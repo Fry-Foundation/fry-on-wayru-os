@@ -1,0 +1,9 @@
+uci -q batch << EOI
+
+del firewall.cfg01e63d.syn_flood
+set firewall.cfg01e63d.synflood_protect='1'
+set firewall.cfg01e63d.flow_offloading='1'
+
+commit firewall
+
+EOI
