@@ -1,9 +1,9 @@
 diff --git a/target/linux/mediatek/dts/mt7981a-comfast-cf-wa933.dts b/target/linux/mediatek/dts/mt7981a-comfast-cf-wa933.dts
 new file mode 100644
-index 0000000000..c3f3dde0b7
+index 0000000000..cb499fb67e
 --- /dev/null
 +++ b/target/linux/mediatek/dts/mt7981a-comfast-cf-wa933.dts
-@@ -0,0 +1,269 @@
+@@ -0,0 +1,274 @@
 +/dts-v1/;
 +#include "mt7981.dtsi"
 +
@@ -13,6 +13,10 @@ index 0000000000..c3f3dde0b7
 +
 +	aliases {								
 +		serial0 = &uart0;
++        led-boot = &led_wlan;
++		led-failsafe = &led_wlan;
++		led-running = &led_wlan;
++		led-upgrade = &led_wlan;
 +	};							
 +
 +	chosen {						
@@ -51,7 +55,7 @@ index 0000000000..c3f3dde0b7
 +			gpios = <&pio 8 GPIO_ACTIVE_LOW>;			
 +		};
 +
-+		wlan_blue {
++		led_wlan: wlan_blue {
 +			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
 +			color = <LED_COLOR_ID_BLUE>;
 +			function = LED_FUNCTION_WLAN;
@@ -273,4 +277,4 @@ index 0000000000..c3f3dde0b7
 +	nvmem-cells = <&eeprom_factory_0>;
 +	nvmem-cell-names = "eeprom";
 +};
-\ No newline at end of file
++

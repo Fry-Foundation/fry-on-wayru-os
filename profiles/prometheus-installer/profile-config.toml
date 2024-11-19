@@ -1,7 +1,7 @@
 [general]
-codename = "Prometheus installer"
+codename = "Prometheus-installer"
 brand = "Wayru"
-model = "Prometheus installer"
+model = "Prometheus"
 
 [build]
 target = "mediatek"
@@ -26,4 +26,5 @@ base = [
     "openvpn-openssl",
     # Wayru services
     "wayru-os-api",
+    "wayru-os-services",
 ]

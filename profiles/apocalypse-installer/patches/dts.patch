@@ -1,9 +1,9 @@
 diff --git a/target/linux/mediatek/dts/mt7981b-comfast-cf-wr633ax.dts b/target/linux/mediatek/dts/mt7981b-comfast-cf-wr633ax.dts
 new file mode 100644
-index 0000000000..a0ebb7e123
+index 0000000000..65d269092f
 --- /dev/null
 +++ b/target/linux/mediatek/dts/mt7981b-comfast-cf-wr633ax.dts
-@@ -0,0 +1,274 @@
+@@ -0,0 +1,278 @@
 +/dts-v1/;
 +#include "mt7981.dtsi"
 +/ {
@@ -11,6 +11,10 @@ index 0000000000..a0ebb7e123
 +	compatible = "comfast,cf-wr633ax", "mediatek,mt7981";			
 +	aliases {								
 +		serial0 = &uart0;
++		led-boot = &led_red;
++		led-failsafe = &led_red;
++		led-running = &led_green;
++		led-upgrade = &led_green;
 +	};							
 +	chosen {						
 +		bootargs-override = "console=ttyS0,115200n8";
@@ -38,11 +42,11 @@ index 0000000000..a0ebb7e123
 +           	label = "blue:led";
 +           	gpios = <&pio 35 GPIO_ACTIVE_HIGH>;
 +        };
-+        lan_green {
++        led_green: lan_green {
 +           	label = "green:led";
 +           	gpios = <&pio 34 GPIO_ACTIVE_HIGH>;
 +        };
-+        wan_red {
++        led_red: wan_red {
 +           	label = "red:led";
 +           	gpios = <&pio 8 GPIO_ACTIVE_HIGH>;
 +        };
@@ -232,7 +236,7 @@ index 0000000000..a0ebb7e123
 +			partition@580000 {
 +				label = "ubi";
 +				reg = <0x580000 0x4000000>;
-+				compatible = "linux,ubi";
++			compatible = "linux,ubi";
 +			};
 +		};
 +	};
@@ -278,4 +282,3 @@ index 0000000000..a0ebb7e123
 +		reg = <0x1a>;
 +	};
 +};
-\ No newline at end of file

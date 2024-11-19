@@ -1,7 +1,7 @@
 [general]
-codename = "Apocalypse installer"
+codename = "Apocalypse-installer"
 brand = "Wayru"
-model = "Apocalypsem installer"
+model = "Apocalypse"
 
 [build]
 target = "mediatek"
@@ -26,4 +26,5 @@ base = [
     "openvpn-openssl",
     # Wayru services
     "wayru-os-api",
+    "wayru-os-services",
 ]
