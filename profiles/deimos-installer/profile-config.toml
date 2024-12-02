@@ -1,12 +1,12 @@
 [general]
-codename = "Kratos"
-brand = "Unifi"
-model = "AC Mesh Pro"
+codename = "Deimos-installer"
+brand = "TP-Link"
+model = "AC1750 Archer A7 V5"
 
 [build]
 target = "ath79"
 subtarget = "generic"
-device_profile = "ubnt_unifiac-mesh-pro"
+device_profile = "tplink_archer-a7-v5"
 
 [packages]
 base = [
@@ -19,9 +19,6 @@ base = [
     "liblua",
     "libuci-lua",
     "libubus-lua",
-    # Enterprise networks
-    "wpad",
-    "radsecproxy",
     # OpenWISP
     "openwisp-config",
     "openwisp-monitoring",
@@ -29,6 +26,4 @@ base = [
     "openvpn-openssl",
     # Wayru services
     "wayru-os-api",
-    "wayru-os-services",
 ]
-
