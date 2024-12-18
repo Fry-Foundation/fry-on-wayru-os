@@ -122,5 +122,10 @@ def main():
 
     upload_to_azure(image_path, AZURE_CONNECTION_STRING, CONTAINER_NAME, codename, version)
 
+    # Upload sysupgrade.bin file
+    sysupgrade_path = os.path.join(output_dir, sysupgrade_file)
+    print(f"Uploading .bin file: {sysupgrade_path}")
+    upload_to_azure(sysupgrade_path, AZURE_CONNECTION_STRING, CONTAINER_NAME, codename, version)
+
 if __name__ == '__main__':
     main()
