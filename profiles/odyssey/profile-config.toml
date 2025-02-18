@@ -21,12 +21,12 @@ base = [
     "libubus-lua",
     # Enterprise networks
     "wpad",
-    #"radsecproxy",
+    "radsecproxy",
     # OpenWISP
-    "openwisp-config",
-    "openwisp-monitoring",
-    "netjson-monitoring",
-    "openvpn-openssl",
+    #"openwisp-config",
+    #"openwisp-monitoring",
+    #"netjson-monitoring",
+    #"openvpn-openssl",
     # Captive portal
     #"opennds",
     #"php8",
