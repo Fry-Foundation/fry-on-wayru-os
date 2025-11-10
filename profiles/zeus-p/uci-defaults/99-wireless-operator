@@ -1,0 +1,15 @@
+uci -q batch << EOI
+
+set wireless.@wifi-device[0].disabled='0'
+set wireless.@wifi-device[0].htmode='VHT80'
+set wireless.@wifi-device[0].channel='auto'
+set wireless.@wifi-device[0].cell_density='0'
+
+set wireless.@wifi-device[1].disabled='0'
+set wireless.@wifi-device[1].htmode='HT40'
+set wireless.@wifi-device[1].channel='auto'
+set wireless.@wifi-device[1].cell_density='0'
+
+commit wireless
+
+EOI

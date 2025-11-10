@@ -1,0 +1,12 @@
+uci -q batch << EOI
+
+del dhcp.lan.ra_slaac
+set dhcp.lan.ra='hybrid'
+set dhcp.lan.dhcpv6='hybrid'
+set dhcp.wan=dhcp
+set dhcp.wan.interface='wan'
+set dhcp.wan.ignore='1'
+
+commit dhcp
+
+EOI
