@@ -1,42 +1,93 @@
+# Fry IoT Profile Configuration
+# genesis: Based on Comfast CF-E375AC (MIPS architecture)
+# Note: MIPS support requires cross-compilation toolchain
+
 [general]
 codename = "Genesis"
-brand = "Wayru"
-model = "Genesis"
+brand = "Fry"
+model = "Genesis Router"
+description = "IoT router based on MIPS architecture (Comfast CF-E375AC compatible)"
 
 [build]
-target = "ath79"
-subtarget = "generic"
-device_profile = "comfast_cf-e375ac"
+architecture = "mipsel"      # Little-endian MIPS
+flavor = "minimal"
+image_size = "128M"          # Limited flash storage
+kernel_package = "linux-image-mipsel"
+
+[system]
+hostname = "fry-genesis"
+root_password = "fryiot"
+timezone = "UTC"
+locale = "en_US.UTF-8"
 
 [packages]
-base = [
-    "curl",
-    "libcurl",
-    "ca-certificates",
-    "lua",
-    "lua-cjson",
-    "luafilesystem",
-    "liblua",
-    "libuci-lua",
-    "libubus-lua",
-    # Enterprise networks
-    "wpad",
-    "radsecproxy",
-    # OpenWISP
-    "openwisp-config",
-    "openwisp-monitoring",
-    "netjson-monitoring",
-    "openvpn-openssl",
-    # Captive portal
-    "opennds",
-    "php8",
-    "php8-cli",
-    "php8-mod-openssl",
-    "dnsmasq-full",
-    "dnsmasq_full_dhcp",
-    "dnsmasq_full_ipset",
-    "ipset",
-    # Wayru services
-    "wayru-os-api",
-    "wayru-os-services",
+include = [
+    # Minimal router packages
+    "hostapd",
+    "dnsmasq",
+    "iptables",
+    "ethtool",
+    "iw",
+    "wireless-tools",
 ]
+
+exclude = [
+    # Exclude packages too large for embedded systems
+    "podman",
+    "iotop",
+    "htop",
+    "vim-tiny",
+    "firefox-esr",
+]
+
+[network]
+[network.ethernet]
+interface = "eth0"
+dhcp = false
+address = "192.168.1.1/24"
+gateway = ""
+
+[network.wifi]
+enabled = true
+interface = "wlan0"
+
+# Bridge for router mode
+[network.bridge]
+enabled = true
+name = "br-lan"
+members = ["eth0"]
+dhcp = false
+address = "192.168.1.1/24"
+
+# VLANs for network segmentation
+[[network.vlans]]
+id = 10
+name = "guest"
+parent = "eth0"
+address = "192.168.10.1/24"
+
+[[network.vlans]]
+id = 20
+name = "iot"
+parent = "eth0"
+address = "192.168.20.1/24"
+
+[hostapd]
+enabled = true
+ssid = "FryNet"
+password = "frynetwork"
+interface = "wlan0"
+channel = 6
+hw_mode = "g"
+
+[dnsmasq]
+enabled = true
+interface = "br-lan"
+dhcp_range = "192.168.1.100,192.168.1.200,12h"
+gateway = "192.168.1.1"
+dns = "8.8.8.8,8.8.4.4"
+
+[fry]
+bandwidth_mining = true
+max_bandwidth_share = 50
+node_type = "router"

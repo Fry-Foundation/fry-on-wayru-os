@@ -1,0 +1,71 @@
+# Fry IoT Profile Configuration
+# arm64-generic: Generic ARM64 profile for SBCs and ARM servers
+
+[general]
+codename = "Atlas"
+brand = "Fry"
+model = "ARM64 Generic"
+description = "Generic ARM64 profile for single-board computers and ARM servers"
+
+[build]
+architecture = "arm64"
+flavor = "minimal"
+image_size = "4G"
+kernel_package = "linux-image-arm64"
+
+[system]
+hostname = "fry-atlas"
+root_password = "fryiot"
+timezone = "UTC"
+locale = "en_US.UTF-8"
+
+[packages]
+include = [
+    # ARM-specific packages
+    "u-boot-tools",
+    "device-tree-compiler",
+    "firmware-linux-free",
+    "firmware-linux-nonfree",
+
+    # GPIO and hardware access
+    "i2c-tools",
+    "spi-tools",
+
+    # Networking
+    "ethtool",
+]
+
+exclude = [
+    # Exclude x86-specific packages
+    "qemu-guest-agent",
+    "open-vm-tools",
+]
+
+[network]
+[network.ethernet]
+interface = "eth0"
+dhcp = true
+
+[network.wifi]
+enabled = true
+interface = "wlan0"
+
+[hostapd]
+enabled = true
+ssid = "FryIoT-AP"
+password = "frynetwork"
+interface = "wlan0"
+channel = 6
+hw_mode = "g"
+
+[dnsmasq]
+enabled = true
+interface = "wlan0"
+dhcp_range = "192.168.4.100,192.168.4.200,12h"
+gateway = "192.168.4.1"
+dns = "8.8.8.8,8.8.4.4"
+
+[fry]
+bandwidth_mining = true
+max_bandwidth_share = 30
+node_type = "router"

@@ -1,5 +1,7 @@
-# wayru-os related
-openwrt/
+# Fry IoT build artifacts
+output/
+work/
+cache/
 tmp/
 
 # Byte-compiled / optimized / DLL files
@@ -44,8 +46,6 @@ share/python-wheels/
 MANIFEST
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -66,24 +66,8 @@ coverage.xml
 *.py,cover
 .hypothesis/
 
-# Django stuff:
+# Logs
 *.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# Pyre type checker
-.pyre/
 
 # mypy
 .mypy_cache/
@@ -99,5 +83,13 @@ dmypy.json
 # VS Code
 .vscode/
 
-# Backup files from migration
+# JetBrains IDEs
+.idea/
+
+# Backup files
 *.backup
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db

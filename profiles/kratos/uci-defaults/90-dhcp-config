@@ -1,6 +1,0 @@
-uci -q batch << EOI
-del dhcp.lan.ra_slaac
-set dhcp.lan.ra='hybrid'
-set dhcp.lan.dhcpv6='hybrid'
-commit dhcp
-EOI

@@ -1,30 +1,109 @@
 [project]
-name = "wayru-os"
-version = "0.1.0"
-description = "wayru-os build system and configuration"
+name = "fry-iot"
+version = "1.0.0"
+description = "Fry IoT - Debian 13 based Linux for routers and IoT devices with Fry Networks integration"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Fry Foundation", email = "dev@fry.network"}
+]
+keywords = ["iot", "debian", "router", "embedded", "linux", "bandwidth-mining", "fry-networks"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Operating System Kernels :: Linux",
+    "Topic :: System :: Systems Administration",
+]
+
 dependencies = [
-    "argcomplete>=3.6.2",
-    "azure-core>=1.34.0",
-    "azure-storage-blob>=12.25.1",
-    "certifi>=2025.4.26",
-    "cffi>=1.17.1",
-    "charset-normalizer>=3.4.2",
-    "cryptography>=45.0.3",
-    "idna>=3.10",
-    "isodate>=0.7.2",
-    "pycparser>=2.22",
-    "python-dotenv>=1.1.0",
-    "pyyaml>=6.0.2",
-    "requests>=2.32.3",
-    "six>=1.17.0",
+    # Configuration parsing
     "toml>=0.10.2",
     "tomlkit>=0.13.2",
-    "tomlq>=0.1.0",
-    "tqdm>=4.66.4",
-    "typing-extensions>=4.13.2",
+    "pyyaml>=6.0.2",
+
+    # Environment management
+    "python-dotenv>=1.1.0",
+
+    # HTTP/Networking
+    "requests>=2.32.3",
     "urllib3>=2.4.0",
+
+    # Azure cloud storage
+    "azure-core>=1.34.0",
+    "azure-storage-blob>=12.25.1",
+
+    # Security/Crypto
+    "cryptography>=45.0.3",
+    "certifi>=2025.4.26",
+    "cffi>=1.17.1",
+    "pycparser>=2.22",
+
+    # CLI utilities
+    "argcomplete>=3.6.2",
+    "tqdm>=4.66.4",
+
+    # Data formats
     "xmltodict>=0.14.2",
-    "yq>=3.4.3",
+    "isodate>=0.7.2",
+
+    # Type checking
+    "typing-extensions>=4.13.2",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=24.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+]
+
+[project.urls]
+Homepage = "https://fry.network/"
+Documentation = "https://docs.fry.network/"
+Repository = "https://github.com/Fry-Foundation/fry-iot"
+Issues = "https://github.com/Fry-Foundation/fry-iot/issues"
+
+[project.scripts]
+fry-build = "tools.build_image:main"
+fry-configure = "tools.configure:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tools"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312", "py313"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"

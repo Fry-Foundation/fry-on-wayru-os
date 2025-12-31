@@ -1,0 +1,70 @@
+# Fry IoT Profile Configuration
+# x86-desktop: Full desktop profile for x86_64 systems
+
+[general]
+codename = "Phoenix"
+brand = "Fry"
+model = "x86-64 Desktop"
+description = "Full Linux desktop with Fry Networks integration"
+
+[build]
+architecture = "amd64"
+flavor = "desktop"           # Includes XFCE desktop environment
+image_size = "8G"
+kernel_package = "linux-image-amd64"
+
+[system]
+hostname = "fry-phoenix"
+root_password = "fryiot"
+timezone = "UTC"
+locale = "en_US.UTF-8"
+
+[packages]
+include = [
+    # Desktop enhancements
+    "pulseaudio",
+    "pavucontrol",
+    "vlc",
+    "gimp",
+    "libreoffice",
+    "thunar",
+    "thunar-archive-plugin",
+    "file-roller",
+
+    # Development tools
+    "git",
+    "build-essential",
+    "python3-dev",
+    "nodejs",
+    "npm",
+
+    # Virtualization
+    "qemu-guest-agent",
+    "spice-vdagent",
+
+    # Printing
+    "cups",
+    "system-config-printer",
+]
+
+exclude = []
+
+[network]
+[network.ethernet]
+interface = "eth0"
+dhcp = true
+
+[network.wifi]
+enabled = true
+interface = "wlan0"
+
+[hostapd]
+enabled = false
+
+[dnsmasq]
+enabled = false
+
+[fry]
+bandwidth_mining = true
+max_bandwidth_share = 25     # Lower share for desktop use
+node_type = "desktop"
