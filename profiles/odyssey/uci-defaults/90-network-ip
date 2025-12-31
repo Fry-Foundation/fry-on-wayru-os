@@ -1,7 +1,0 @@
-uci -q batch << EOI
-
-set network.lan.ipaddr='192.168.45.1'
-
-commit network
-
-EOI

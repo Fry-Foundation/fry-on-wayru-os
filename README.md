@@ -1,105 +1,241 @@
-# wayru-os
-```
- _       __                       ____  _____
-| |     / /___ ___  _________  __/ __ \/ ___/
-| | /| / / __ `/ / / / ___/ / / / / / /\__ \
-| |/ |/ / /_/ / /_/ / /  / /_/ / /_/ /___/ /
-|__/|__/\__,_/\__, /_/   \__,_/\____//____/
-             /____/
-```
-WayruOS is a Linux distribution based on OpenWrt. It is designed to be used in routers and other embedded devices. It runs Wayru's operator services and applications.
+# Fry IoT
 
-This repository contains the configuration files to build WayruOS with the OpenWrt build system. It also contains device profiles that include configuration and dependencies specific to each device.
+```
+  ______              _____    _______
+ |  ____|            |_   _|  |__   __|
+ | |__ _ __ _   _      | |  ___  | |
+ |  __| '__| | | |     | | / _ \ | |
+ | |  | |  | |_| |    _| || (_) || |
+ |_|  |_|   \__, |   |_____\___/ |_|
+             __/ |
+            |___/
+
+ Debian 13 (Trixie) based Linux for IoT devices
+ Contribute to Fry Networks - Bandwidth Mining & More
+```
+
+Fry IoT is a Debian 13 (Trixie) based Linux distribution designed for routers, single-board computers, and IoT devices. It enables users to run full Linux desktops, servers, and contribute to Fry Networks through bandwidth mining and other decentralized services.
 
 ## Features
 
-- Enterprise networks and Passpoint
-- Captive portal
-- OpenWISP integration
-- OpenVPN integration
-- Wayru onboarding
-- Wayru monitoring
-- Wayru firmware upgrades
+- **Full Debian 13 (Trixie)** - Complete Linux experience with access to all Debian packages
+- **Fry Networks Integration** - Built-in bandwidth mining and network contribution
+- **Multi-Architecture Support** - x86_64, ARM64, ARMhf, and MIPS architectures
+- **Router Ready** - Network configuration, hostapd, dnsmasq, and firewall included
+- **Desktop Option** - Optional XFCE desktop environment for full desktop experience
+- **Server Mode** - Docker, Podman, and server packages available
+- **Easy Configuration** - TOML-based profile system for device customization
+- **Systemd Native** - Modern init system with full systemd integration
 
-## Supported devices
+## Fry Networks
 
-Check the profiles directory for the supported devices.
+Fry IoT includes integration with Fry Networks, enabling:
+
+- **Bandwidth Mining** - Share your unused bandwidth and earn rewards
+- **Node Operation** - Run a Fry Network node on your device
+- **Web Dashboard** - Monitor your contributions via local web UI (port 8080)
+- **Automatic Updates** - Stay up-to-date with the latest Fry software
+
+## Supported Devices
+
+### Generic Profiles
+| Profile | Architecture | Description |
+|---------|--------------|-------------|
+| `x86-generic` | amd64 | PCs, VMs, and servers |
+| `x86-desktop` | amd64 | Full desktop with XFCE |
+| `arm64-generic` | arm64 | ARM64 SBCs (Pi 4, Orange Pi, etc.) |
+| `genesis` | mipsel | MIPS-based routers |
+
+### Legacy Hardware Profiles
+The `profiles/` directory contains additional device profiles. See individual profile configurations for supported hardware.
+
+## Quick Start
+
+### Prerequisites
+
+Install build dependencies:
+
+```bash
+# Install just (command runner)
+cargo install just
+# Or via package manager: apt install just
+
+# Install uv (Python package manager)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install system dependencies (Debian/Ubuntu)
+just install-deps
+```
+
+### Building an Image
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Fry-Foundation/fry-iot.git
+   cd fry-iot
+   ```
+
+2. **Set up the environment:**
+   ```bash
+   just setup
+   ```
+
+3. **Configure your profile:**
+   ```bash
+   cp .env.example .env
+   # Edit .env and set PROFILE=x86-generic (or your preferred profile)
+   ```
+
+4. **Build the image:**
+   ```bash
+   PROFILE=x86-generic just full-build
+   ```
+
+5. **Test in QEMU (x86 only):**
+   ```bash
+   just test-qemu
+   ```
+
+### Writing to SD Card / USB
+
+```bash
+sudo dd if=output/fry-iot-x86-generic.img of=/dev/sdX bs=4M status=progress
+sync
+```
 
 ## Configuration
 
-This repository contains configuration files to build WayruOS.
-- Base firmware configuration: `base-config.toml`
-- Per-device configuration: `profiles/<device-codename>/profile-config.toml`
+### Base Configuration
 
-## Versioning
+The `base-config.toml` file contains global settings:
+- Debian mirror and suite configuration
+- Core and IoT package lists
+- Fry Networks integration settings
+- Build output configuration
 
-WayruOS uses [Semantic Versioning](https://semver.org/).
+### Profile Configuration
 
-The firmware version is composed of 4 parts:
-- Device codename
-- Major version: typically follows the OpenWrt version (e.g. 21, 22, 23)
-- Minor version: incremented for each release with new features
-- Patch version: incremented for each build that includes bug fixes or small improvements
+Each profile in `profiles/<name>/profile-config.toml` defines:
+- Device architecture and build options
+- Additional packages to install
+- Network configuration (ethernet, WiFi, VLANs)
+- Hostapd and dnsmasq settings
+- Fry Networks node configuration
 
-Format: `wayru-os-{device-codename}-{major}.{minor}.{patch}`
+### Example Profile
 
-Example: `wayru-os-genesis-23.1.0`
+```toml
+[general]
+codename = "MyDevice"
+brand = "Fry"
+model = "Custom Router"
 
-## Repo setup
-Make sure to install:
-- `just`
-- `uv`
-- `git`
-- Dependencies needed to build OpenWrt: https://openwrt.org/docs/guide-developer/toolchain/install-buildsystem
+[build]
+architecture = "arm64"
+flavor = "minimal"
+image_size = "4G"
 
-### Quick setup:
-1. Install `just`: `cargo install just` or use your package manager
-2. Install `uv`: `curl -LsSf https://astral.sh/uv/install.sh | sh` or `pip install uv`
-3. Set up the Python environment: `just setup`
+[packages]
+include = ["hostapd", "dnsmasq"]
+exclude = ["podman"]
 
-## Repo tools
-The repo has tools to configure, build, and publish wayru-os images.
+[network.ethernet]
+interface = "eth0"
+dhcp = true
 
-Check the `justfile` and the `tools` folder for a better understanding of the tools available.
+[fry]
+bandwidth_mining = true
+node_type = "router"
+```
 
-You can also run `just` to show all available recipes.
+## Available Commands
 
-### Quick start:
-To set up and build a wayru-os image, you can follow these steps:
-1. Set up the environment: `just setup`
-2. Configure your profile in the `.env` file (copy from `.env.example`)
-3. Run the complete build: `just full-build`
+Run `just` to see all available commands:
 
-### Development workflow:
-For iterative development after initial setup:
-- Make changes to configuration
-- Run: `just dev-build`
-- Upload when ready: `just upload-build`
+```
+just setup          # Set up Python environment
+just install-deps   # Install system build dependencies
+just configure      # Configure build for selected profile
+just build          # Build complete image
+just build-rootfs   # Build rootfs only (no disk image)
+just test-qemu      # Test image in QEMU
+just compress       # Compress built images
+just upload-build   # Upload to cloud storage
+just validate       # Validate built image
+just clean          # Clean build artifacts
+just reset          # Full reset
+just info           # Show build information
+```
+
+## Default Credentials
+
+- **Username:** `fry`
+- **Password:** `fryiot`
+- **Root password:** `fryiot`
+
+**Important:** Change these passwords after first boot!
+
+## Web Dashboard
+
+After booting, access the Fry Dashboard at:
+```
+http://<device-ip>:8080
+```
+
+## Directory Structure
+
+```
+fry-iot/
+├── base-config.toml      # Global configuration
+├── justfile              # Build automation
+├── pyproject.toml        # Python dependencies
+├── profiles/             # Device profiles
+│   ├── x86-generic/      # Generic x86 profile
+│   ├── arm64-generic/    # Generic ARM64 profile
+│   └── ...               # Additional profiles
+├── tools/                # Build scripts
+│   ├── build-image.py    # Main image builder
+│   ├── configure.py      # Configuration generator
+│   ├── configure-fry.py  # Fry Networks setup
+│   └── ...               # Additional tools
+├── resources/            # Shared resources
+│   └── ascii-logo        # Boot banner
+├── output/               # Built images (generated)
+├── work/                 # Build workspace (generated)
+└── cache/                # Package cache (generated)
+```
 
 ## Contributing
 
-This project is now open source. Contributions are welcome! Please follow these guidelines:
+Contributions are welcome! Please follow these guidelines:
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Test with `just build` and `just validate`
 5. Submit a pull request
 
+### Adding New Device Profiles
+
+1. Create a new directory in `profiles/<device-name>/`
+2. Add a `profile-config.toml` with device configuration
+3. Optionally add custom files in `profiles/<device-name>/files/`
+4. Test the build with `PROFILE=<device-name> just build`
+
 ## License
+
 This project is licensed under the MIT License.
 
 ## Support
 
-**Important**: This project is now open source and maintained by the community. WAYRU no longer exists and will not provide support for this repository. For issues, questions, or contributions, please use the GitHub Issues section.
+- **Issues:** [GitHub Issues](https://github.com/Fry-Foundation/fry-iot/issues)
+- **Documentation:** [https://docs.fry.network/](https://docs.fry.network/)
+- **Fry Networks:** [https://fry.network/](https://fry.network/)
 
-💙 **Farewell Message**
+## Acknowledgments
 
-With gratitude and love, we say goodbye.
-WAYRU is closing its doors, but we are leaving these repositories open and free for the community.
-May they continue to inspire builders, dreamers, and innovators.
+This project builds upon the foundation of the WayruOS project. We thank the original Wayru team for their contributions to open-source networking software.
 
-With love, WAYRU
 ---
 
-**Note**: This project is **open source**. Wayru, Inc and The Wayru Foundation are no longer operating entities, and will not provide any kind of support. The community is welcome to use, modify, and improve this codebase.
+**Note:** This project is open source and community-maintained. Join us in building the future of decentralized networking!

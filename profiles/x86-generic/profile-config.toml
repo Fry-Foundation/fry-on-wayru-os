@@ -1,0 +1,81 @@
+# Fry IoT Profile Configuration
+# x86-generic: Generic x86_64 profile for PCs, VMs, and servers
+
+[general]
+codename = "Voyage"
+brand = "Fry"
+model = "x86-64 Generic"
+description = "Generic x86_64 profile for PCs, VMs, and servers"
+
+[build]
+architecture = "amd64"
+flavor = "minimal"           # minimal, desktop, or server
+image_size = "4G"
+kernel_package = "linux-image-amd64"
+
+[system]
+hostname = "fry-voyage"
+root_password = "fryiot"     # Change after first boot!
+timezone = "UTC"
+locale = "en_US.UTF-8"
+
+[packages]
+# Additional packages specific to this profile
+include = [
+    # Virtualization guest tools
+    "qemu-guest-agent",
+    "open-vm-tools",
+    "spice-vdagent",
+
+    # Additional networking
+    "ethtool",
+    "tcpdump",
+
+    # System monitoring
+    "sysstat",
+    "dstat",
+]
+
+# Packages to exclude from the base installation
+exclude = []
+
+[network]
+# Ethernet configuration
+[network.ethernet]
+interface = "eth0"
+dhcp = true
+
+# WiFi configuration (disabled for server)
+[network.wifi]
+enabled = false
+
+# Bridge configuration (for VM hosting)
+[network.bridge]
+enabled = false
+name = "br0"
+members = ["eth0"]
+dhcp = true
+
+# VLAN configuration
+[[network.vlans]]
+id = 10
+name = "vlan10"
+parent = "eth0"
+address = "192.168.10.1/24"
+dhcp = false
+
+[hostapd]
+enabled = false
+
+[dnsmasq]
+enabled = true
+interface = "eth0"
+dhcp_range = "192.168.1.100,192.168.1.200,12h"
+gateway = "192.168.1.1"
+dns = "8.8.8.8,8.8.4.4"
+
+[fry]
+# Fry Networks specific configuration for this device
+bandwidth_mining = true
+max_bandwidth_share = 50     # Percentage of bandwidth to share
+node_type = "server"

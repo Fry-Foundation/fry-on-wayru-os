@@ -1,131 +1,255 @@
+#!/usr/bin/env python3
+"""
+Fry IoT Build Upload Tool
+
+Uploads built Fry IoT images to cloud storage (Azure Blob Storage or S3-compatible).
+"""
+
 import os
-import shutil
+import sys
 import json
-import tarfile
+import hashlib
+from pathlib import Path
+from datetime import datetime
+
 import toml
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 load_dotenv()
 
-BUILD_DIR = 'openwrt' 
-IMAGE_NAME_TEMPLATE = 'wayru-os-{}-{}.tar.gz'
+# Project paths
+PROJECT_ROOT = Path(__file__).parent.parent
+BASE_CONFIG_PATH = PROJECT_ROOT / "base-config.toml"
+OUTPUT_DIR = PROJECT_ROOT / "output"
+TMP_DIR = PROJECT_ROOT / "tmp"
 
 # Azure configuration
-AZURE_CONNECTION_STRING = os.getenv('AZURE_CONNECTION_STRING')
-CONTAINER_NAME = os.getenv('CONTAINER_NAME')
+AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
+CONTAINER_NAME = os.getenv("CONTAINER_NAME", "fry-iot-images")
 
-def find_output_dir(base_dir):
-    for root, dirs, files in os.walk(base_dir):
-        if 'sha256sums' in files and any('sysupgrade' in file for file in files):
-            return root
-    return None
-
-def get_sysupgrade_hash_and_file(output_dir):
-    sha256sum_path = os.path.join(output_dir, 'sha256sums')
-    sysupgrade_hash = None
-    sysupgrade_file = None
-
-    with open(sha256sum_path, 'r') as sha_file:
-        lines = sha_file.readlines()
-
-    for line in lines:
-        if 'sysupgrade' in line:
-            parts = line.split()
-            sysupgrade_hash = parts[0]
-            sysupgrade_file = parts[1].strip('*')
-            break
-
-    return sysupgrade_hash, sysupgrade_file
-
-def get_codename_and_version():
-    # Get codename from device.json
-    device_json_path = os.path.join(BUILD_DIR, 'files', 'etc', 'wayru-os', 'device.json')
-    with open(device_json_path) as json_file:
-        device_info = json.load(json_file)
-        codename = device_info['name']
-
-    # Get version from VERSION
-    """version_file_path = os.path.join(BUILD_DIR, 'VERSION')
-    with open(version_file_path) as version_file:
-        version = version_file.read().strip()"""
-    
-    # Get version from base-config.toml
-    base_config_path = 'base-config.toml' 
-    base_config = toml.load(base_config_path)
-    version = base_config['general']['os_version']
-
-    return codename, version
+# Image name template
+IMAGE_NAME_TEMPLATE = "fry-iot-{codename}-{version}"
 
 
-def package_files(output_dir, sysupgrade_hash, sysupgrade_file, codename, version):
+def load_config():
+    """Load base configuration."""
+    with open(BASE_CONFIG_PATH) as f:
+        return toml.load(f)
 
-    image_name = IMAGE_NAME_TEMPLATE.format(codename, version)
-    image_path = os.path.join(output_dir, image_name)
+
+def load_device_info():
+    """Load device info from build artifacts."""
+    device_json_path = TMP_DIR / "device.json"
+    if not device_json_path.exists():
+        print("Error: device.json not found. Run 'just configure' first.")
+        sys.exit(1)
+
+    with open(device_json_path) as f:
+        return json.load(f)
 
 
-    with tarfile.open(image_path, 'w:gz') as tar:
-        #sysupgrade hash 
-        temp_sha256sums_path = os.path.join(output_dir, 'temp_sha256sums')
-        with open(temp_sha256sums_path, 'w') as sha_file:
-            sha_file.write(f"{sysupgrade_hash}\n")
+def calculate_sha256(file_path: Path) -> str:
+    """Calculate SHA256 hash of a file."""
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
 
-        tar.add(temp_sha256sums_path, arcname='sha256sums')
 
-        # Add the sysupgrade file to the tar.gz
-        sysupgrade_path = os.path.join(output_dir, sysupgrade_file)
-        tar.add(sysupgrade_path, arcname=sysupgrade_file)
+def find_images() -> list:
+    """Find all built images in the output directory."""
+    images = []
 
-    os.remove(temp_sha256sums_path)
+    if not OUTPUT_DIR.exists():
+        return images
 
-    return image_path
+    # Look for .img and compressed variants
+    for pattern in ["*.img", "*.img.xz", "*.img.gz", "*.tar.gz", "*.tar.xz"]:
+        images.extend(OUTPUT_DIR.glob(pattern))
 
-def check_blob_exists(blob_service_client, container_name, blob_prefix):
-   
-    container_client = blob_service_client.get_container_client(container_name)
-    blobs = container_client.list_blobs(name_starts_with=blob_prefix)
-    
-    return any(True for _ in blobs)
+    return sorted(images)
 
-def upload_to_azure(file_path, connection_string, container_name, codename, version):
-    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-    blob_folder_path = f'targets/{codename}/{version}/{os.path.basename(file_path)}'
 
-    if check_blob_exists(blob_service_client, container_name, blob_folder_path):
-        print(f"There is already a folder with the version '{version}' in '{codename}'.")
-        respuesta = input("Do you want to replace it? (yes/no): ").strip().lower()
-        if respuesta != 'yes':
-            print("Operation cancelled.")
-            return
+def check_blob_exists(blob_service_client, container_name: str, blob_path: str) -> bool:
+    """Check if a blob already exists."""
+    try:
+        container_client = blob_service_client.get_container_client(container_name)
+        blobs = list(container_client.list_blobs(name_starts_with=blob_path))
+        return len(blobs) > 0
+    except Exception:
+        return False
 
-    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_folder_path)
-    print(f"Uploading {file_path} to Azure Blob Storage")
-    
+
+def upload_file_to_azure(
+    file_path: Path,
+    blob_service_client,
+    container_name: str,
+    blob_path: str,
+    overwrite: bool = False,
+):
+    """Upload a file to Azure Blob Storage with progress bar."""
+    if not overwrite and check_blob_exists(blob_service_client, container_name, blob_path):
+        print(f"  Blob already exists: {blob_path}")
+        response = input("  Overwrite? (yes/no): ").strip().lower()
+        if response != "yes":
+            print("  Skipped.")
+            return False
+
+    blob_client = blob_service_client.get_blob_client(
+        container=container_name, blob=blob_path
+    )
+
+    file_size = file_path.stat().st_size
+    print(f"  Uploading: {file_path.name} ({file_size / (1024*1024):.1f} MB)")
+
     with open(file_path, "rb") as data:
-        blob_client.upload_blob(data, overwrite=True)
-    print(f"Uploaded {file_path} to Azure Blob Storage at {blob_folder_path}")
+        with tqdm(total=file_size, unit="B", unit_scale=True, desc="  Progress") as pbar:
+            blob_client.upload_blob(
+                data,
+                overwrite=True,
+                max_concurrency=4,
+                length=file_size,
+            )
+            pbar.update(file_size)
+
+    print(f"  Uploaded to: {blob_path}")
+    return True
+
+
+def create_manifest(images: list, device_info: dict, base_config: dict) -> dict:
+    """Create a manifest file for the build."""
+    version = base_config.get("general", {}).get("os_version", "1.0.0")
+    codename = device_info.get("name", "unknown")
+
+    manifest = {
+        "name": f"Fry IoT {codename}",
+        "version": version,
+        "codename": codename,
+        "architecture": device_info.get("architecture", "unknown"),
+        "build_date": datetime.utcnow().isoformat() + "Z",
+        "debian_suite": base_config.get("debian", {}).get("suite", "trixie"),
+        "images": [],
+    }
+
+    for image_path in images:
+        image_info = {
+            "filename": image_path.name,
+            "size": image_path.stat().st_size,
+            "sha256": calculate_sha256(image_path),
+        }
+        manifest["images"].append(image_info)
+
+    return manifest
+
 
 def main():
-    output_dir = find_output_dir(BUILD_DIR)
-    if not output_dir:
-        print("Output directory with required files not found.")
-        return
+    """Main upload process."""
+    print(f"""
+╔══════════════════════════════════════════════════════════════╗
+║                  Fry IoT Build Uploader                      ║
+╚══════════════════════════════════════════════════════════════╝
+""")
 
-    sysupgrade_hash, sysupgrade_file = get_sysupgrade_hash_and_file(output_dir)
-    if not sysupgrade_hash or not sysupgrade_file:
-        print("No sysupgrade files found in output directory")
-        return
+    # Check Azure configuration
+    if not AZURE_CONNECTION_STRING:
+        print("Error: AZURE_CONNECTION_STRING environment variable not set.")
+        print("Please set it in your .env file or environment.")
+        sys.exit(1)
 
-    codename, version = get_codename_and_version()
-    image_path = package_files(output_dir, sysupgrade_hash, sysupgrade_file, codename, version)
-    print(f"Files packaged successfully: {image_path}")
+    # Load configurations
+    base_config = load_config()
+    device_info = load_device_info()
 
-    upload_to_azure(image_path, AZURE_CONNECTION_STRING, CONTAINER_NAME, codename, version)
+    version = base_config.get("general", {}).get("os_version", "1.0.0")
+    codename = device_info.get("name", "unknown")
 
-    # Upload sysupgrade.bin file
-    sysupgrade_path = os.path.join(output_dir, sysupgrade_file)
-    print(f"Uploading .bin file: {sysupgrade_path}")
-    upload_to_azure(sysupgrade_path, AZURE_CONNECTION_STRING, CONTAINER_NAME, codename, version)
+    print(f"Device: {codename}")
+    print(f"Version: {version}")
+    print(f"Architecture: {device_info.get('architecture', 'unknown')}")
+    print()
 
-if __name__ == '__main__':
+    # Find images
+    images = find_images()
+    if not images:
+        print("Error: No images found in output directory.")
+        print("Run 'just build' first to create images.")
+        sys.exit(1)
+
+    print(f"Found {len(images)} image(s):")
+    for img in images:
+        print(f"  - {img.name} ({img.stat().st_size / (1024*1024):.1f} MB)")
+    print()
+
+    # Create manifest
+    manifest = create_manifest(images, device_info, base_config)
+    manifest_path = OUTPUT_DIR / "manifest.json"
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+    print(f"Created manifest: {manifest_path}")
+
+    # Create SHA256SUMS file
+    sha256sums_path = OUTPUT_DIR / "SHA256SUMS"
+    with open(sha256sums_path, "w") as f:
+        for image_info in manifest["images"]:
+            f.write(f"{image_info['sha256']}  {image_info['filename']}\n")
+    print(f"Created checksums: {sha256sums_path}")
+    print()
+
+    # Connect to Azure
+    print("Connecting to Azure Blob Storage...")
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(
+            AZURE_CONNECTION_STRING
+        )
+    except Exception as e:
+        print(f"Error connecting to Azure: {e}")
+        sys.exit(1)
+
+    # Upload files
+    blob_prefix = f"releases/{codename}/{version}"
+    print(f"Uploading to: {CONTAINER_NAME}/{blob_prefix}/")
+    print()
+
+    uploaded_count = 0
+
+    # Upload images
+    for image_path in images:
+        blob_path = f"{blob_prefix}/{image_path.name}"
+        if upload_file_to_azure(
+            image_path, blob_service_client, CONTAINER_NAME, blob_path
+        ):
+            uploaded_count += 1
+
+    # Upload manifest
+    manifest_blob_path = f"{blob_prefix}/manifest.json"
+    upload_file_to_azure(
+        manifest_path, blob_service_client, CONTAINER_NAME, manifest_blob_path, overwrite=True
+    )
+    uploaded_count += 1
+
+    # Upload checksums
+    sha256sums_blob_path = f"{blob_prefix}/SHA256SUMS"
+    upload_file_to_azure(
+        sha256sums_path, blob_service_client, CONTAINER_NAME, sha256sums_blob_path, overwrite=True
+    )
+    uploaded_count += 1
+
+    print()
+    print(f"""
+╔══════════════════════════════════════════════════════════════╗
+║                    Upload Complete!                          ║
+╚══════════════════════════════════════════════════════════════╝
+
+Uploaded {uploaded_count} file(s) to Azure Blob Storage.
+Location: {CONTAINER_NAME}/{blob_prefix}/
+
+Download URL (if public):
+  https://<storage-account>.blob.core.windows.net/{CONTAINER_NAME}/{blob_prefix}/
+""")
+
+
+if __name__ == "__main__":
     main()

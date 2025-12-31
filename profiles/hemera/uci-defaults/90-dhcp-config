@@ -1,4 +1,0 @@
-uci -q batch << EOI
-del dhcp.lan.ra_slaac
-commit dhcp
-EOI
